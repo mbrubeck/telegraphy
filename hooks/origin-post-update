@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "Pulling to workdir."
+cd ../workdir || exit
+unset GIT_DIR
+git pull origin master
+exec git-update-server-info
