@@ -51,9 +51,10 @@ Run
 ---
 
 Run `ruby -rubygems telegraphy.rb` to start the application, then go to
-http://localhost:4567/ to view your files.  Click on a file name to view or
-edit it.  Your changes will be committed automatically to the git repository,
-and you can them pull them into any cloned repositories.
+[http://localhost:4567/](http://localhost:4567/) to view your files.  Click on
+a file name to view or edit it.  Your changes will be committed automatically
+to the git repository, and you can them pull them into any cloned
+repositories.
 
 Deploy
 ------
@@ -68,7 +69,14 @@ mod_passenger), create a Rackup file like this in the telegraphy directory:
     EOF
 
 You can also use Rack middleware to add features like OpenID or password
-authentication.  Check your server documentation and the [Sinatra Book][2] for
+authentication.  For example, to add (not very secure) basic authentication,
+you could add this above the `run` line in `config.ru`:
+
+    use Rack::Auth::Basic do |username, password| 
+      username == 'me' && password == 'foo'
+    end
+
+Check your server documentation and the [Sinatra Book][2] for
 more Rack configuration instructions.
 
 To do
@@ -76,9 +84,9 @@ To do
 
 * Handle conflicts (if a change is pushed to the repository while you're
   editing a file).
-* Creating new files through the web app.
-* Better UI design.
+* Create new files through the web app.
 * Integrate with todo.sh.
+* Better UI design.
 
 [1]: http://ginatrapani.github.com/todo.txt-cli/
 [2]: http://www.sinatrarb.com/book.html
