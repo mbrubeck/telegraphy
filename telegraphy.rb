@@ -31,7 +31,7 @@ __END__
 @@ index
 <!DOCTYPE html>
 <html><head>
-  <title><%= @path %></title>
+  <title><%= @path %> (Telegraphy)</title>
 </head><body>
   <h1><%= @path %></h1>
   <ul><% @o.contents.each {|o| %>
@@ -44,7 +44,7 @@ __END__
 @@ file
 <!DOCTYPE html>
 <html><head>
-  <title><%= @path %></title>
+  <title><%= @path %> (Telegraphy)</title>
 </head><body>
   <h1><%= @path %></h1>
   <form method="post">

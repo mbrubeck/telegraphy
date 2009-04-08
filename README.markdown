@@ -78,6 +78,7 @@ To do
   editing a file).
 * Creating new files through the web app.
 * Better UI design.
+* Integrate with todo.sh.
 
 [1]: http://ginatrapani.github.com/todo.txt-cli/
 [2]: http://www.sinatrarb.com/book.html
