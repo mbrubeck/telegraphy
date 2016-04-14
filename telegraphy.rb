@@ -6,7 +6,21 @@ include Rugged
 $git_dir = 'data/workdir'
 $repo = Repository.new($git_dir)
 
+def updateRepo()
+  $repo.checkout('master')
+
+  # fetch
+  remote = $repo.remotes['origin']
+  remote.fetch()
+
+  # merge
+  distant_commit = $repo.branches['origin/master'].target
+  $repo.references.update($repo.head, distant_commit.oid)
+end
+
 get %r{/(.*)} do |path|
+  updateRepo()
+
   @path = path
   begin
     @tree = $repo.lookup($repo.head.target_id).tree
@@ -27,6 +41,7 @@ end
 
 post %r{/(.*)} do |path|
   halt 405 if path.empty? and @request.params['name'].nil?
+  updateRepo()
   path = @request.params['name'].nil? ? path : @request.params['name']
 
   content = @request.params['data'].nil? ? "" : @request.params['data'].gsub(/\r\n/, "\n")

@@ -9,6 +9,9 @@ git repository, so I can edit them on any computer.  I wrote Telegraphy so
 that I could view and edit my notes from my mobile phone, or from other
 computers that don't have git installed.
 
+If a conflict is detected, the conflict will be erased and the pushed version
+will be kept.
+
 Install
 -------
 
@@ -82,8 +85,6 @@ more Rack configuration instructions.
 To do
 -----
 
-* Handle conflicts (if a change is pushed to the repository while you're
-  editing a file).
 * Integrate with todo.sh.
 * Better UI design.
 
