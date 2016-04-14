@@ -8,7 +8,11 @@ $repo = Repository.new($git_dir)
 
 get %r{/(.*)} do |path|
   @path = path
-  @tree = $repo.lookup($repo.head.target_id).tree
+  begin
+    @tree = $repo.lookup($repo.head.target_id).tree
+  rescue ReferenceError
+    @tree = []
+  end
 
   if path.empty?
     erb :index
@@ -29,7 +33,10 @@ post %r{/(.*)} do |path|
 
   oid = $repo.write(content, :blob)
   index = $repo.index
-  index.read_tree($repo.head.target.tree)
+  begin
+    index.read_tree($repo.head.target.tree)
+  rescue ReferenceError
+  end
   index.add(:path => path, :oid => oid, :mode => 0100644)
 
   options = {}
