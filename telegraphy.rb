@@ -1,28 +1,50 @@
 #!/usr/bin/env ruby
 require 'sinatra'
-require 'grit'
-include Grit
+require 'rugged'
+include Rugged
 
 $git_dir = 'data/workdir'
-$repo = Repo.new $git_dir
+$repo = Repository.new($git_dir)
 
 get %r{/(.*)} do |path|
   @path = path
-  @o = path.empty? ? $repo.tree : $repo.tree/path
-  erb (@o.is_a? Tree) ? :index : :file
+  @tree = $repo.lookup($repo.head.target_id).tree
+
+  if path.empty?
+    erb :index
+  else
+    file = @tree.find { |f| f[:name] == path }
+    redirect "/" if file.nil?
+
+    @f = $repo.lookup(file[:oid])
+    erb :file
+  end
 end
 
 post %r{/(.*)} do |path|
-  o = $repo.tree/path
-  halt 405 unless o.is_a? Blob
-  filename = File.join($git_dir, path)
-  open(filename, 'w') do |f|
-    f << @request.params['data'].gsub(/\r\n/, "\n")
-  end
-  Dir.chdir $git_dir do
-    $repo.add path
-    $repo.commit_index "Update #{path} from Telegraphy."
-  end
+  halt 405 if path.empty?
+
+  @tree = $repo.lookup($repo.head.target_id).tree
+  file = @tree.find { |f| f[:name] == path }
+  halt 405 if file.empty?
+
+  oid = $repo.write(@request.params['data'].gsub(/\r\n/, "\n"), :blob)
+  index = $repo.index
+  index.read_tree($repo.head.target.tree)
+  index.add(:path => path, :oid => oid, :mode => 0100644)
+
+  options = {}
+  options[:tree] = index.write_tree($repo)
+
+  options[:author] = { :email => "telegraphy@git.com", :name => 'Telegraphy', :time => Time.now }
+  options[:committer] = { :email => "telegraphy@git.com", :name => 'Telegraphy', :time => Time.now }
+  options[:message] ||= "Update #{path} from Telegraphy."
+  options[:parents] = $repo.empty? ? [] : [ $repo.head.target ].compact
+  options[:update_ref] = 'HEAD'
+
+  Commit.create($repo, options)
+  $repo.push 'origin', ['refs/heads/master']
+
   redirect "/#{path}"
 end
 
@@ -34,9 +56,9 @@ __END__
   <title><%= @path %> (Telegraphy)</title>
 </head><body>
   <h1><%= @path %></h1>
-  <ul><% @o.contents.each {|o| %>
-    <li><a href="<%= File.join('/',@path,o.name) %>">
-      <%= o.name %>
+  <ul><% @tree.each {|o| %>
+    <li><a href="<%= File.join('/',@path,o[:name]) %>">
+      <%= o[:name] %>
     </a></li>
   <% } %></ul>
 </body></html>
@@ -48,7 +70,7 @@ __END__
 </head><body>
   <h1><%= @path %></h1>
   <form method="post">
-    <p><textarea name="data" rows="24" cols="80"><%= @o.data %></textarea>
+    <p><textarea name="data" rows="24" cols="80"><%= @f.content %></textarea>
     <p><input type="submit" value="Save">
   </form>
 </body></html>
