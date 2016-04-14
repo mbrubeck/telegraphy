@@ -26,7 +26,7 @@ post %r{/(.*)} do |path|
 
   @tree = $repo.lookup($repo.head.target_id).tree
   file = @tree.find { |f| f[:name] == path }
-  halt 405 if file.empty?
+  halt 405 if file.nil?
 
   oid = $repo.write(@request.params['data'].gsub(/\r\n/, "\n"), :blob)
   index = $repo.index
