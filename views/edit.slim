@@ -1,0 +1,12 @@
+.row
+  .col.s12
+    .card.hoverable
+      form(method="post")
+        .card-content
+          .card-title = @path
+          .input-field
+            textarea#data.materialize-textarea(name="data") = @f.content
+            label(for="data") Content here
+        .card-action
+          button.btn.waves-effect.waves-light.green.lighten-1(type="submit") Save
+          / i.material-icons.right send

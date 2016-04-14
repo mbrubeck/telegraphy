@@ -1,0 +1,4 @@
+.collection
+  - @tree.each do |file|
+    - path = File.join('/', @path, file[:name])
+    a.collection-item(href="#{path}") = file[:name]
