@@ -84,7 +84,6 @@ To do
 
 * Handle conflicts (if a change is pushed to the repository while you're
   editing a file).
-* Create new files through the web app.
 * Integrate with todo.sh.
 * Better UI design.
 

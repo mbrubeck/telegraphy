@@ -22,13 +22,12 @@ get %r{/(.*)} do |path|
 end
 
 post %r{/(.*)} do |path|
-  halt 405 if path.empty?
+  halt 405 if path.empty? and @request.params['name'].nil?
+  path = @request.params['name'].nil? ? path : @request.params['name']
 
-  @tree = $repo.lookup($repo.head.target_id).tree
-  file = @tree.find { |f| f[:name] == path }
-  halt 405 if file.nil?
+  content = @request.params['data'].nil? ? "" : @request.params['data'].gsub(/\r\n/, "\n")
 
-  oid = $repo.write(@request.params['data'].gsub(/\r\n/, "\n"), :blob)
+  oid = $repo.write(content, :blob)
   index = $repo.index
   index.read_tree($repo.head.target.tree)
   index.add(:path => path, :oid => oid, :mode => 0100644)
@@ -60,7 +59,11 @@ __END__
     <li><a href="<%= File.join('/',@path,o[:name]) %>">
       <%= o[:name] %>
     </a></li>
-  <% } %></ul>
+    <% } %>
+    <li><form method="post">
+      + <input name="name" type="text" placeholder="New file name" /> 
+      <button type="submit">Create</button>
+    </form></li></ul>
 </body></html>
 
 @@ file
