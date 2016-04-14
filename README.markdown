@@ -86,7 +86,6 @@ To do
 -----
 
 * Integrate with todo.sh.
-* Better UI design.
 
 [1]: http://ginatrapani.github.com/todo.txt-cli/
 [2]: http://www.sinatrarb.com/book.html
