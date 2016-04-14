@@ -16,11 +16,11 @@ Get the telegraphy source:
 
     git clone git://github.com/mbrubeck/telegraphy.git
 
-Telegraphy depends on Sinatra and Grit.  You may also need to add several Grit
+Telegraphy depends on Sinatra and Rugged.  You may also need to add several Rugged
 dependencies, if they aren't automatically installed:
 
-    gem install sinatra grit
-    gem install rcov hoe archive-tar-minitar nokogiri mime-types
+    gem install sinatra rugged
+    gem install simplecov hoe archive-tar-minitar nokogiri mime-types
 
 Create the Telegraphy git repository:
 
