@@ -1,3 +1,7 @@
+Active repository
+=================
+All changes are now done in it's original repository: https://github.com/mbrubeck/telegraphy.
+
 Telegraphy
 ==========
 
