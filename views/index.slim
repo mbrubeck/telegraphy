@@ -44,7 +44,8 @@ html
           a.modal-action.modal-close.waves-effect.waves-light.btn.grey.lighten-1.white-text Close
     
       .collection 
-        a.green-text.collection-item(ng-repeat="file in api.files", ng-click="api.edit(file.name)" href="#")
+        a.red-text.collection-item(ng-show="api.files.length == 0") No files to show...
+        a.green-text.collection-item(ng-repeat="file in api.files" ng-click="api.edit(file.name)" href="#")
           i.material-icons mode_edit
           span &nbsp;{{ file.name }}
 
