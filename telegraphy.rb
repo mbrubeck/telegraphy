@@ -138,9 +138,9 @@ put %r{/files/(.*)} do |path|
   end
 
   oid = $repo.write("", :blob)
-  $repo.index.add(:path => file, :oid => oid, :mode => 0100644)
+  $repo.index.add(:path => path, :oid => oid, :mode => 0100644)
 
-  Commit.create($repo, createOptions(file, "Create"))
+  Commit.create($repo, createOptions(path, "Create"))
   $repo.push REMOTE, ['refs/heads/' << BRANCH]
 end
 
