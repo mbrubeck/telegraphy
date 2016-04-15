@@ -42,6 +42,46 @@ def createOptions(file, action)
   return options
 end
 
+# Retrieve a list of all files (included in subdirectory)
+def getFiles(tree, name)
+  files = []
+
+  tree.each_tree do |subtree|
+    path = name + subtree[:name] + '/'
+    subfiles = getFiles($repo.lookup(subtree[:oid]), path)
+    files.push(*subfiles)
+  end
+
+  tree.each_blob do |file|
+    file[:name] = name + file[:name]
+    files.push(file)
+  end
+
+  return files
+end
+
+# Retrieve the a file
+def getFile(tree, name, path = '')
+  blob = nil
+
+  tree.each_blob do |file|
+    blob = file if file[:name] == name[/[^\/]*/]
+    blob[:name] = path + blob[:name]
+  end
+
+  if blob.nil?
+    tree.each_tree do |subtree|
+      if subtree[:name] == name[/[^\/]*/]
+        path += name.slice! name[/[^\/]*/]
+        name[0] = ''
+        return getFile($repo.lookup(subtree[:oid]), name, path + '/')
+      end
+    end
+  end
+
+  return blob
+end
+
 # ======== ROUTES ========
 
 # Return the HMTL index
@@ -54,19 +94,23 @@ get '/files' do
   files = []
   begin
     updateRepo()
+
     tree = $repo.lookup($repo.head.target_id).tree
-    tree.map { |f| files.push(f) }
+    files = getFiles(tree, '/')
   rescue ReferenceError
   end
   files.to_json
 end
 
 # Return JSON object with the content of the given file
-get '/files/:file' do |file|
+get %r{/files/(.*)} do |path|
   begin
     updateRepo()
+
     tree = $repo.lookup($repo.head.target_id).tree
-    blob = tree.find { |f| f[:name] == file }
+    blob = getFile(tree, path)
+    hald 404 if blob.nil?
+
     file = $repo.lookup(blob[:oid])
     {
       name: blob[:name], 
@@ -81,13 +125,13 @@ get '/files/:file' do |file|
 end
 
 # Create a new empty file
-put '/files/:file' do |file|
+put %r{/files/(.*)} do |path|
   begin
     updateRepo()
     $repo.index.read_tree($repo.head.target.tree)
 
     tree = $repo.lookup($repo.head.target_id).tree
-    blob = tree.find { |f| f[:name] == file }
+    blob = tree.find { |f| f[:name] == path }
     halt 304 unless blob.nil?
   rescue ReferenceError
     # Empty repository
@@ -101,7 +145,7 @@ put '/files/:file' do |file|
 end
 
 # Modify the content of the file
-post '/files/:file' do |file|
+post %r{/files/(.*)} do |path|
   halt 405 if @request.params['content'].nil?
   
   oid = $repo.write(@request.params['content'].gsub(/\r\n/, "\n"), :blob)
@@ -113,8 +157,8 @@ post '/files/:file' do |file|
     # Empty repository
   end
 
-  $repo.index.add(:path => file, :oid => oid, :mode => 0100644)
+  $repo.index.add(:path => path, :oid => oid, :mode => 0100644)
 
-  Commit.create($repo, createOptions(file, "Update"))
+  Commit.create($repo, createOptions(path, "Update"))
   $repo.push REMOTE, ['refs/heads/' << BRANCH]
 end
