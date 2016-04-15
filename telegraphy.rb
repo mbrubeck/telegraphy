@@ -20,10 +20,9 @@ def updateRepo()
 end
 
 get %r{/(.*)} do |path|
-  updateRepo()
-
   @path = path
   begin
+    updateRepo()
     @tree = $repo.lookup($repo.head.target_id).tree
   rescue ReferenceError
     @tree = []
@@ -42,7 +41,6 @@ end
 
 post %r{/(.*)} do |path|
   halt 405 if path.empty? and @request.params['name'].nil?
-  updateRepo()
   path = @request.params['name'].nil? ? path : @request.params['name']
 
   content = @request.params['data'].nil? ? "" : @request.params['data'].gsub(/\r\n/, "\n")
@@ -50,6 +48,7 @@ post %r{/(.*)} do |path|
   oid = $repo.write(content, :blob)
   index = $repo.index
   begin
+    updateRepo()
     index.read_tree($repo.head.target.tree)
   rescue ReferenceError
   end
