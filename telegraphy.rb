@@ -4,19 +4,33 @@ require 'slim'
 require 'rugged'
 include Rugged
 
-$git_dir = 'data/workdir'
-$repo = Repository.new($git_dir)
+GIT_DIR = 'data/workdir'
+REMOTE = 'origin'
+BRANCH = 'master'
+$repo = Repository.new(GIT_DIR)
 
 def updateRepo()
-  $repo.checkout('master')
+  $repo.checkout(BRANCH)
 
   # fetch
-  remote = $repo.remotes['origin']
+  remote = $repo.remotes['' << REMOTE]
   remote.fetch()
 
   # merge
-  distant_commit = $repo.branches['origin/master'].target
+  distant_commit = $repo.branches['' << REMOTE << '/' << BRANCH].target
   $repo.references.update($repo.head, distant_commit.oid)
+end
+
+def createOptions(file)
+  options = {}
+  options[:tree] = index.write_tree($repo)
+
+  options[:author] = { :email => "telegraphy@git.com", :name => 'Telegraphy', :time => Time.now }
+  options[:committer] = { :email => "telegraphy@git.com", :name => 'Telegraphy', :time => Time.now }
+  options[:message] ||= "Update #{file} from Telegraphy."
+  options[:parents] = $repo.empty? ? [] : [ $repo.head.target ].compact
+  options[:update_ref] = 'HEAD'
+  return options
 end
 
 get %r{/(.*)} do |path|
@@ -54,17 +68,8 @@ post %r{/(.*)} do |path|
   end
   index.add(:path => path, :oid => oid, :mode => 0100644)
 
-  options = {}
-  options[:tree] = index.write_tree($repo)
-
-  options[:author] = { :email => "telegraphy@git.com", :name => 'Telegraphy', :time => Time.now }
-  options[:committer] = { :email => "telegraphy@git.com", :name => 'Telegraphy', :time => Time.now }
-  options[:message] ||= "Update #{path} from Telegraphy."
-  options[:parents] = $repo.empty? ? [] : [ $repo.head.target ].compact
-  options[:update_ref] = 'HEAD'
-
-  Commit.create($repo, options)
-  $repo.push 'origin', ['refs/heads/master']
+  Commit.create($repo, createOptions(path))
+  $repo.push REMOTE, ['refs/heads/' << BRANCH]
 
   redirect "/#{path}"
 end
