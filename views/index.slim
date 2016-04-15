@@ -9,9 +9,9 @@ html
 
     title Telegraphy
   body(ng-app="api", ng-controller="ApiController as api")
-    nav
-      .nav-wrapper.green.lighten-1
-        a.brand-logo(href="/") &nbsp;Telegraphy
+    nav.green.lighten-1
+      .container.nav-wrapper
+        a.brand-logo(href="/") Telegraphy
         ul.right
           li
             a#refresh.waves-effect.waves-light(ng-click="api.refresh()")
@@ -44,7 +44,7 @@ html
             i.material-icons.right done
           a.modal-action.modal-close.waves-effect.waves-light.btn.grey.lighten-1.white-text Close
     
-      .collection 
+      .collection.hoverable
         a.red-text.collection-item(ng-show="api.files.length == 0") No files to show...
         a.green-text.collection-item(ng-repeat="file in api.files" ng-click="api.edit(file.name)" href="#")
           i.material-icons mode_edit
