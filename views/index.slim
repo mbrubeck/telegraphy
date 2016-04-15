@@ -1,4 +1,7 @@
 .collection
+  - if @tree.count == 0
+    a.collection-item
+      i.red-text No file to show...
   - @tree.each do |file|
     - path = File.join('/', @path, file[:name])
     a.collection-item(href="#{path}") = file[:name]
